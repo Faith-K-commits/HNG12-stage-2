@@ -61,9 +61,15 @@ async def delete_book(book_id: int) -> None:
     db.delete_book(book_id)
     return JSONResponse(status_code=status.HTTP_204_NO_CONTENT, content=None)
 
+from fastapi import HTTPException
+
 @router.get("/{book_id}", response_model=Book, status_code=status.HTTP_200_OK)
-async def get_book(book_id: int):
+async def get_book(book_id: str):
+    if not book_id.isdigit():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Book not found")
+
+    book_id = int(book_id)
     book = db.books.get(book_id)
     if not book:
-        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"Detail": "Book not found"})
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"detail": "Book not found"})
     return book
